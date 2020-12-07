@@ -346,7 +346,23 @@ impl Segment {
             return self.read_group_all_rows_all_rle(group_columns, aggregates);
         }
 
-        ReadGroupResult::default()
+        // If there is a single group column then we can use an optimised
+        // approach for building group keys
+        if group_columns.len() == 1 {
+            return self.read_group_single_group_column(predicates, group_columns[0], aggregates);
+        }
+
+        // Perform the group by using a hashmap
+        self.read_group_hash(predicates, group_columns, aggregates)
+    }
+
+    fn read_group_hash<'a>(
+        &self,
+        predicates: &[Predicate<'a>],
+        group_columns: &'a [ColumnName<'_>],
+        aggregates: &'a [(ColumnName<'_>, AggregateType)],
+    ) -> ReadGroupResult<'a> {
+        todo!()
     }
 
     // Optimised read group method when there are no predicates and all the group
